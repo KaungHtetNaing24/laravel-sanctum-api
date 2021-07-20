@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 use App\Models\Product;
+use App\Models\Product_model;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
@@ -16,6 +17,24 @@ class ProductController extends Controller
         // return Product::all();
         $products = Product::get()->toJson(JSON_PRETTY_PRINT);
         return response($products, 200);
+    }
+
+    public function getProductModelById($id){
+        
+       
+        if (Product::where('id', $id)->exists()) {
+            $product_models = Product::find($id)->product_models->toJson(JSON_PRETTY_PRINT);
+            return response($product_models, 200);
+        }else{
+            return response()->json([
+                "message" => "Product not found"
+            ], 404);
+        }
+       
+        
+
+        
+       
     }
 
     /**
@@ -43,6 +62,35 @@ class ProductController extends Controller
          ], 201);
    
     }
+
+    public function addProductModel(Request $request, $id)
+    {
+
+        $request->validate([
+            'name'=>'required',
+        ]);
+        
+        
+        if (Product::where('id', $id)->exists()) {
+            $product = Product::find($id);
+            $product_model = new Product_model();
+            $product_model->name = $request->name;
+            $product->product_models()->save($product_model);
+            return response()->json([
+                "message" => "new product's model created"
+                 ], 201);
+        }else{
+            return response()->json([
+                "message" => "Product not found"
+            ], 404);
+        }
+       
+       
+       
+        
+    }
+
+    
 
     /**
      * Display the specified resource.
@@ -86,6 +134,23 @@ class ProductController extends Controller
     
     }
 
+    public function updateProductModel(Request $request, $id){
+        if (Product_model::where('id', $id)->exists()) {
+            $product_model = Product_model::find($id);
+            $product_model->name = is_null($request->name) ? $product_model->name : $request->name;
+            $product_model->save();
+    
+            return response()->json([
+                "message" => "Product's model updated successfully"
+            ], 200);
+            
+        } else {
+            return response()->json([
+                "message" => "Product's model not found"
+            ], 404);
+        }
+    }
+
     /**
      * Remove the specified resource from storage.
      *
@@ -106,6 +171,21 @@ class ProductController extends Controller
           } else {
             return response()->json([
               "message" => "Product not found"
+            ], 404);
+          }
+    }
+
+    public function deleteProductModel($id){
+        if(Product_model::where('id', $id)->exists()) {
+            $product_model = Product_model::find($id);
+            $product_model->delete();
+    
+            return response()->json([
+              "message" => "Product's model deleted"
+            ], 202);
+          } else {
+            return response()->json([
+              "message" => "Product's model not found"
             ], 404);
           }
     }
