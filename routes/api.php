@@ -30,6 +30,11 @@ Route::get('/products/search/{name}',  [ProductController::class, 'search']);
  Route::put('/update-productModel/{id}', [ProductController::class, 'updateProductModel']);
  Route::delete('/delete-productModel/{id}', [ProductController::class, 'deleteProductModel']);
 
+ //one-to-one relationship
+ Route::post('/add-company/{id}', [ProductController::class, 'addCompany']);
+ Route::get('/get-companyById/{id}', [ProductController::class, 'getCompanByProduct']);
+
+
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();

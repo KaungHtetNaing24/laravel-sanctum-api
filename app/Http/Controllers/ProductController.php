@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 use App\Models\Product;
 use App\Models\Product_model;
+use App\Models\Company;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
@@ -37,6 +38,18 @@ class ProductController extends Controller
        
     }
 
+    public function getCompanByProduct($id){
+        
+        if (Product::where('id', $id)->exists()) {
+            $companies = Product::find($id)->companies->toJson(JSON_PRETTY_PRINT);
+            return response($companies, 200);
+        }else{
+            return response()->json([
+                "message" => "Product not found"
+            ], 404);
+        }
+    }
+
     /**
      * Store a newly created resource in storage.
      *
@@ -62,7 +75,7 @@ class ProductController extends Controller
          ], 201);
    
     }
-
+    //add Product's model
     public function addProductModel(Request $request, $id)
     {
 
@@ -88,6 +101,28 @@ class ProductController extends Controller
        
        
         
+    }
+
+    //add Company
+    public function addCompany(Request $request, $id){
+        $request->validate([
+            'name'=>'required',
+        ]);
+        
+        
+        if (Product::where('id', $id)->exists()) {
+            $product = Product::find($id);
+            $company = new Company();
+            $company->name = $request->name;
+            $product->companies()->save($company);
+            return response()->json([
+                "message" => "new Company created"
+                 ], 201);
+        }else{
+            return response()->json([
+                "message" => "Product not found"
+            ], 404);
+        }
     }
 
     

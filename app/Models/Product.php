@@ -15,4 +15,8 @@ class Product extends Model
     public function product_models(){
         return $this->hasMany(Product_model::class);
     } 
+
+    public function companies(){
+        return $this->hasOne(Company::class);
+    }
 }
