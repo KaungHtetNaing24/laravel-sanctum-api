@@ -1,6 +1,7 @@
 <?php
 
-use App\Http\Controllers\ProductController; 
+use App\Http\Controllers\Rest\ProductController;
+use App\Http\Controllers\Rest\RoleController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -16,7 +17,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 
-Route::resource('products',ProductController::class);
+Route::resource('/products',ProductController::class);
 Route::get('/products/search/{name}',  [ProductController::class, 'search']);
 
 
@@ -25,14 +26,21 @@ Route::get('/products/search/{name}',  [ProductController::class, 'search']);
 // Route::post('/products', [ProductController::class, 'store']);
 
  //one-to-many relationship
- Route::post('/add-productModel/{id}', [ProductController::class, 'addProductModel']);
- Route::get('/get-productModelById/{id}', [ProductController::class, 'getProductModelById']);
- Route::put('/update-productModel/{id}', [ProductController::class, 'updateProductModel']);
- Route::delete('/delete-productModel/{id}', [ProductController::class, 'deleteProductModel']);
+ Route::post('/product-model', [ProductController::class, 'addProductModel']);
+ Route::get('/product-model', [ProductController::class, 'getProductModel']);
+ Route::put('/product-model/{id}', [ProductController::class, 'updateProductModel']);
+ Route::delete('/product-model/{id}', [ProductController::class, 'deleteProductModel']);
+
 
  //one-to-one relationship
- Route::post('/add-company/{id}', [ProductController::class, 'addCompany']);
- Route::get('/get-companyById/{id}', [ProductController::class, 'getCompanByProduct']);
+ Route::post('/company/{id}', [ProductController::class, 'addCompany']);
+ Route::get('/company/{id}', [ProductController::class, 'getCompanByProduct']);
+
+ //many-to-many
+ Route::get('/add-roles', [RoleController::class, 'addRole']);
+ Route::get('/add-users', [RoleController::class, 'addUser']);
+ Route::get('/rolesbyuser/{id}', [RoleController::class, 'getAllRolesByUser']);
+ Route::get('/usersbyroles/{id}', [RoleController::class, 'getAllUsersByRole']);
 
 
 

@@ -1,12 +1,14 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Rest;
+
+use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\Product_model;
 use App\Models\Company;
 use Illuminate\Http\Request;
 
-class ProductController extends Controller
+class ProductController extends Controller 
 {
     /**
      * Display a listing of the resource.
@@ -20,21 +22,13 @@ class ProductController extends Controller
         return response($products, 200);
     }
 
-    public function getProductModelById($id){
+    public function getProductModel(){
         
-       
-        if (Product::where('id', $id)->exists()) {
-            $product_models = Product::find($id)->product_models->toJson(JSON_PRETTY_PRINT);
-            return response($product_models, 200);
-        }else{
-            return response()->json([
-                "message" => "Product not found"
-            ], 404);
-        }
        
         
 
-        
+        $product_models = Product_model::get()->toJson(JSON_PRETTY_PRINT);
+        return response($product_models, 200);
        
     }
 
@@ -45,7 +39,7 @@ class ProductController extends Controller
             return response($companies, 200);
         }else{
             return response()->json([
-                "message" => "Product not found"
+                "message" => "Product not found",
             ], 404);
         }
     }
@@ -71,32 +65,31 @@ class ProductController extends Controller
         $product->save();
 
         return response()->json([
-        "message" => "new product created"
+        "message" => "new product created",
+        $product
          ], 201);
    
     }
     //add Product's model
-    public function addProductModel(Request $request, $id)
+    public function addProductModel(Request $request)
     {
 
         $request->validate([
             'name'=>'required',
+            'product_id'=>'required'
         ]);
         
         
-        if (Product::where('id', $id)->exists()) {
-            $product = Product::find($id);
+            $product = new Product;
             $product_model = new Product_model();
             $product_model->name = $request->name;
-            $product->product_models()->save($product_model);
+            $product_model->product_id = $request->product_id;
+            $product_model->save();
             return response()->json([
-                "message" => "new product's model created"
+                $product_model
+                
                  ], 201);
-        }else{
-            return response()->json([
-                "message" => "Product not found"
-            ], 404);
-        }
+        
        
        
        
@@ -116,7 +109,7 @@ class ProductController extends Controller
             $company->name = $request->name;
             $product->companies()->save($company);
             return response()->json([
-                "message" => "new Company created"
+                "message" => "new Company created",$company
                  ], 201);
         }else{
             return response()->json([
@@ -158,7 +151,7 @@ class ProductController extends Controller
             $product->save();
     
             return response()->json([
-                "message" => "Product updated successfully"
+                "message" => "Product updated successfully",$product
             ], 200);
             
         } else {
@@ -176,7 +169,7 @@ class ProductController extends Controller
             $product_model->save();
     
             return response()->json([
-                "message" => "Product's model updated successfully"
+                $product_model
             ], 200);
             
         } else {
