@@ -1,11 +1,10 @@
 <?php
 
-namespace App\Http\Controllers\Rest;
+namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\Product_model;
-use App\Models\Company;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller 
@@ -17,35 +16,24 @@ class ProductController extends Controller
      */
     public function index()
     {
-        // return Product::all();
-        $products = Product::get()->toJson(JSON_PRETTY_PRINT);
-        return response($products, 200);
-        
-    }
-
-
-
-    public function getProductModel(){
-        
        
+        $products = Product::paginate(5);
+        return view('product.index',compact('products'));
         
-
-        $product_models = Product_model::get()->toJson(JSON_PRETTY_PRINT);
-        return response($product_models, 200);
-       
     }
 
-    public function getCompanByProduct($id){
+    public function getProductModel($id){
+        $products = Product::find($id);
+        $product_models = Product::find($id)->product_models;
+        $product_models = Product_model::where('product_id', '=', $id)->paginate(5);
         
-        if (Product::where('id', $id)->exists()) {
-            $companies = Product::find($id)->companies->toJson(JSON_PRETTY_PRINT);
-            return response($companies, 200);
-        }else{
-            return response()->json([
-                "message" => "Product not found",
-            ], 404);
-        }
+        
+        return view('product-model.index',compact('products','product_models'));
     }
+
+
+
+
 
     /**
      * Store a newly created resource in storage.
@@ -60,69 +48,60 @@ class ProductController extends Controller
             'description'=>'required'
 
         ]);
-        // return Product::create($request->all());
+      
 
         $product = new Product;
         $product->name = $request->name;
         $product->description = $request->description;
         $product->save();
-        return response()->json([
-        "message" => "new product created",
-        $product
-         ], 201);
+
+
+        return redirect('/products')->with('success', 'Successfully created');
    
     }
     //add Product's model
-    public function addProductModel(Request $request)
+    public function addProductModel(Request $request,$id)
     {
 
         $request->validate([
             'name'=>'required',
-            'product_id'=>'required'
+            
+            
+            
         ]);
         
         
             
-
-            
+            $product = Product::find($id);
             $product_model = new Product_model();
             $product_model->name = $request->name;
-            $product_model->product_id = $request->product_id;
-            $product_model->save();
-            return response()->json([
-                "message" => "new product's model created",
-                $product_model
-
-                 ], 201);
-        
-        
-       
-     
-       
-        
-    }
-
-    //add Company
-    public function addCompany(Request $request, $id){
-        $request->validate([
-            'name'=>'required',
-        ]);
-        
-        
-        if (Product::where('id', $id)->exists()) {
-            $product = Product::find($id);
-            $company = new Company();
-            $company->name = $request->name;
-            $product->companies()->save($company);
-            return response()->json([
-                "message" => "new Company created",$company
-                 ], 201);
+            
+            if($request->hasFile('image'))
+        {
+            $file = $request->file('image');
+            $extension = $file->getClientOriginalExtension();
+            $file_name = time().'.'.$extension;
+            $file->move(public_path('images'),$file_name);
+            $product_model->image = $file_name;
         }else{
-            return response()->json([
-                "message" => "Product not found"
-            ], 404);
+            return 'no file selected';
         }
+
+            
+            $product->product_models()->save($product_model);
+            
+            return redirect('products/'.$product-> id.'/product-model')->with('success', 'Successfully created');
+
+
+
+        
+       
+       
+       
+        
     }
+
+
 
     
 
@@ -151,18 +130,15 @@ class ProductController extends Controller
     
      public function update(Request $request, $id)
     {
-        // $product = Product::find($id);
-        // $product->update($request->all());
-        // return $product;
+
 
         if (Product::where('id', $id)->exists()) {
             $product = Product::find($id);
-            
             $product->name = is_null($request->name) ? $product->name : $request->name;
             $product->description = is_null($request->description) ? $product->description : $request->description;
             $product->save();
     
-            
+            return redirect('/products')->with('success', 'Successfully updated');
             
             
             return response()->json([
@@ -179,15 +155,29 @@ class ProductController extends Controller
 
     public function updateProductModel(Request $request, $id){
         if (Product_model::where('id', $id)->exists()) {
+            
             $product_model = Product_model::find($id);
             $product_model->name = is_null($request->name) ? $product_model->name : $request->name;
+            if($request->hasFile('image'))
+            {
+                $file = $request->file('image');
+                $extension = $file->getClientOriginalExtension();
+                $file_name = time().'.'.$extension;
+                $file->move(public_path('images'),$file_name);
+                $product_model->image = $file_name;
+            }else{
+                return 'no file selected';
+            }
+            
+            
+            
             $product_model->save();
-
+            return redirect('products/'.$product_model-> product_id.'/product-model')->with('success', 'Successfully updated');
+            
             return response()->json([
-                "message" => "Product's model updated successfully",
                 $product_model
             ], 200);
-
+            
         } else {
             return response()->json([
                 "message" => "Product's model not found"
@@ -209,7 +199,7 @@ class ProductController extends Controller
             $product = Product::find($id);
             $product->delete();
     
-            
+            return redirect('/products')->with('success', 'Successfully deleteed');
             
             
             return response()->json([
@@ -226,7 +216,7 @@ class ProductController extends Controller
         if(Product_model::where('id', $id)->exists()) {
             $product_model = Product_model::find($id);
             $product_model->delete();
-            
+            return redirect('products/'.$product_model-> product_id.'/product-model')->with('success', 'Successfully Deleted');
             
             
             

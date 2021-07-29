@@ -22,11 +22,12 @@ Route::get('/products/search/{name}',  [ProductController::class, 'search']);
 
 
 
+
 // Route::get('/products',  [ProductController::class, 'index']);
 // Route::post('/products', [ProductController::class, 'store']);
 
  //one-to-many relationship
- Route::post('/product-model', [ProductController::class, 'addProductModel']);
+ Route::post('/product-model/', [ProductController::class, 'addProductModel']);
  Route::get('/product-model', [ProductController::class, 'getProductModel']);
  Route::put('/product-model/{id}', [ProductController::class, 'updateProductModel']);
  Route::delete('/product-model/{id}', [ProductController::class, 'deleteProductModel']);
