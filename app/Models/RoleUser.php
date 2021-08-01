@@ -10,4 +10,6 @@ class RoleUser extends Model
     use HasFactory;
 
     protected $table = "role_users";
+
+    protected $fillable = ['user_id','role_id'];
 }
